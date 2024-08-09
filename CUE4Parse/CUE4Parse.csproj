@@ -42,6 +42,10 @@
     <EmbeddedResource Include="Resources\PUBGNameHashMap.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="GameTypes\FN\Assets\Exports\Sound\Sequence\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <BuildInParallel>false</BuildInParallel> <!-- we can't run 2 cmake build at same time -->
     <CMakeProject>../CUE4Parse-Natives/</CMakeProject>
