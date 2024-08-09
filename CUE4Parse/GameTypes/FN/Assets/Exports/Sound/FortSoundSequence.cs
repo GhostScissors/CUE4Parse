@@ -5,7 +5,7 @@ using CUE4Parse.UE4.Assets.Readers;
 
 namespace CUE4Parse.GameTypes.FN.Assets.Exports.Sound;
 
-public class FortSoundSequence : UObject
+public class UFortSoundSequence : UObject
 {
     public FSoundSequenceData[] SoundSequenceData;
     
