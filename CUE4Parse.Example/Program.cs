@@ -1,9 +1,13 @@
 using System;
+using System.IO;
+using System.Threading.Tasks;
+using CUE4Parse.Compression;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
+using CUE4Parse.MappingsProvider;
+using CUE4Parse.UE4.Assets.Exports.CustomizableObject;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
-using Newtonsoft.Json;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -11,42 +15,33 @@ namespace CUE4Parse.Example
 {
     public static class Program
     {
-        private const string _gameDirectory = "D:\\Games\\Fortnite\\FortniteGame\\Content\\Paks"; // Change game directory path to the one you have.
-        private const string _aesKey = "0xF271F4B1EA375C42D3676058BAE8FBA295CB61F773070A706A48EAD7C6F98CDB";
+        private const string GameDirectory = @"D:\Fortnite\FortniteGame\Content\Paks";
+        private const string AesKey = "0xEA7890DEE1405AD33B98840DF9CFA4AB6E9597F1AB6F8DE12E1B52E4579CADA7";
 
-        private const string _mapping = "./mappings.usmap";
-        private const string _objectPath = "FortniteGame/Content/Athena/Items/Cosmetics/Characters/CID_A_112_Athena_Commando_M_Ruckus";
-        private const string _objectName = "FortCosmeticCharacterPartVariant_0";
+        private const string MappingsFile = @"D:\Leaking Tools\FModel\Output\.data\++Fortnite+Release-31.20-CL-36217724-Android_oo.usmap";
 
-        // Rick has 2 exports as of today
-        //      - CID_A_112_Athena_Commando_M_Ruckus
-        //      - FortCosmeticCharacterPartVariant_0
-        //
-        // this example will show you how to get them all or just one of them
-
-        public static void Main()
+        public static async Task Main()
         {
-            Log.Logger = new LoggerConfiguration().WriteTo.Console(theme: AnsiConsoleTheme.Literate).CreateLogger();
+            Log.Logger = new LoggerConfiguration().WriteTo.Console(theme: SystemConsoleTheme.Literate).CreateLogger();
 
-            var provider = new ApkFileProvider(@"C:\Users\valen\Downloads\ZqOY4K41h0N_Qb6WjEe23TlGExojpQ.apk", true, new VersionContainer(EGame.GAME_UE5_3));
-            // var provider = new DefaultFileProvider(_gameDirectory, SearchOption.TopDirectoryOnly, true, new VersionContainer(EGame.GAME_UE5_3));
-            // provider.MappingsContainer = new FileUsmapTypeMappingsProvider(_mapping);
+            await InitOodle().ConfigureAwait(false);
+            
+            var provider = new DefaultFileProvider(new DirectoryInfo(GameDirectory), SearchOption.TopDirectoryOnly, true, new VersionContainer(EGame.GAME_UE5_5));
+            provider.MappingsContainer = new FileUsmapTypeMappingsProvider(MappingsFile);
+            await provider.SubmitKeyAsync(new FGuid(), new FAesKey(AesKey));
 
-            provider.Initialize(); // will scan local files and read them to know what it has to deal with (PAK/UTOC/UCAS/UASSET/UMAP)
-            provider.SubmitKey(new FGuid(), new FAesKey(_aesKey)); // decrypt basic info (1 guid - 1 key)
+            provider.Initialize();
+            await provider.MountAsync().ConfigureAwait(false);
 
-            provider.LoadLocalization(ELanguage.English); // explicit enough
+            var customizableObject = await provider.LoadObjectAsync<UCustomizableObject>("FortniteGame/Plugins/GameFeatures/Juno/FigureCosmetics/Content/Figure/_Figure_Core/Mutable/CustomizableObject/CO_Figure_v2.CO_Figure_v2");
+            Console.ReadKey();
+        }
 
-            // these 2 lines will load all exports the asset has and transform them in a single Json string
-            var allExports = provider.LoadAllObjects(_objectPath);
-            var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
-
-            // each exports have a name, these 2 lines will load only one export the asset has
-            // you must use "LoadObject" and provide the full path followed by a dot followed by the export name
-            var variantExport = provider.LoadObject(_objectPath + "." + _objectName);
-            var variantJson = JsonConvert.SerializeObject(variantExport, Formatting.Indented);
-
-            Console.WriteLine(variantJson); // Outputs the variantJson.
+        private static async Task InitOodle()
+        {
+            var oodlePath = Path.Combine(Environment.CurrentDirectory, OodleHelper.OODLE_DLL_NAME);
+            if (!File.Exists(oodlePath)) await OodleHelper.DownloadOodleDllAsync(oodlePath).ConfigureAwait(false);
+            OodleHelper.Initialize(oodlePath);
         }
     }
 }
