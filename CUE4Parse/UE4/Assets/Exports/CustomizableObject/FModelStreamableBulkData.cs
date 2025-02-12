@@ -17,13 +17,10 @@ public class FModelStreamableBulkData
         ClothingStreamables = Ar.ReadMap(() => (Ar.Read<uint>(), new FClothingStreamable(Ar)));
         RealTimeMorphStreamables = Ar.ReadMap(() => (Ar.Read<uint>(), new FRealTimeMorphStreamable(Ar)));
 
-        if (bCooked)
+        StreamableBulkData = new FByteBulkData[Ar.Read<int>()];
+        for (int i = 0; i < StreamableBulkData.Length; i++)
         {
-            StreamableBulkData = new FByteBulkData[Ar.Read<int>()];
-            for (int i = 0; i < StreamableBulkData.Length; i++)
-            {
-                StreamableBulkData[i] = new FByteBulkData(Ar);
-            }
+            StreamableBulkData[i] = new FByteBulkData(Ar);
         }
     }
 }

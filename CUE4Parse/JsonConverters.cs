@@ -10,6 +10,7 @@ using CUE4Parse.UE4.Assets.Exports.Animation;
 using CUE4Parse.UE4.Assets.Exports.Animation.ACL;
 using CUE4Parse.UE4.Assets.Exports.BuildData;
 using CUE4Parse.UE4.Assets.Exports.Component.StaticMesh;
+using CUE4Parse.UE4.Assets.Exports.CustomizableObject.Mutable;
 using CUE4Parse.UE4.Assets.Exports.Engine.Font;
 using CUE4Parse.UE4.Assets.Exports.Material;
 using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
@@ -39,6 +40,8 @@ using CUE4Parse.UE4.Wwise;
 using CUE4Parse.UE4.Wwise.Objects;
 using CUE4Parse.Utils;
 using Newtonsoft.Json;
+using Type = System.Type;
+
 #pragma warning disable CS8765
 
 namespace CUE4Parse;
@@ -1962,6 +1965,48 @@ public class FMaterialParameterInfoConverter : JsonConverter<FMaterialParameterI
         throw new NotImplementedException();
     }
 }
+
+public class FModelConverter : JsonConverter<FModel>
+{
+    public override void WriteJson(JsonWriter writer, FModel value, JsonSerializer serializer)
+    {
+        writer.WriteStartObject();
+
+        writer.WritePropertyName("Version");
+        serializer.Serialize(writer, value.Version);
+
+        writer.WritePropertyName("Program");
+        serializer.Serialize(writer, value.Program);
+
+        writer.WriteEndObject();
+    }
+
+    public override FModel? ReadJson(JsonReader reader, Type objectType, FModel? existingValue, bool hasExistingValue,
+        JsonSerializer serializer)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class FProgramConverter : JsonConverter<FProgram>
+{
+    public override void WriteJson(JsonWriter writer, FProgram value, JsonSerializer serializer)
+    {
+        writer.WriteStartObject();
+
+        writer.WritePropertyName("States");
+        serializer.Serialize(writer, value.States);
+
+        writer.WriteEndObject();
+    }
+
+    public override FProgram? ReadJson(JsonReader reader, Type objectType, FProgram? existingValue, bool hasExistingValue,
+        JsonSerializer serializer)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 
 public class FVirtualTextureDataChunkConverter : JsonConverter<FVirtualTextureDataChunk>
 {
